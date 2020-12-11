@@ -1,26 +1,22 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useRef } from 'react'
+import FixedFooter from './components/FixedFooter'
+import MainContent, { MainContentAction } from './components/MainContent'
+import { useGlobalData } from './provider/data'
 
-function App() {
+const TranslatePage: React.FC = () => {
+  const mainContentRef = useRef<MainContentAction>()
+  const { noEnLangs } = useGlobalData()
+  // 导出
+  const doExport = () => {
+    mainContentRef.current.exportZip()
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div style={{ minHeight: 'calc(100vh - 64px)', paddingBottom: '84px' }}>
+      <MainContent actionRef={mainContentRef} />
+      <FixedFooter langs={noEnLangs} onExport={doExport} />
     </div>
-  );
+  )
 }
 
-export default App;
+export default TranslatePage
