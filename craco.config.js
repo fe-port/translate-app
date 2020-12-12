@@ -1,6 +1,12 @@
 const CracoLessPlugin = require('craco-less')
 
 module.exports = {
+  // webpack: {
+  //   configure: (webpackConfig, { env, paths }) => {
+  //     webpackConfig.output.publicPath = 'translate-app'
+  //     return webpackConfig
+  //   }
+  // },
   babel: {
     plugins: [
       [
