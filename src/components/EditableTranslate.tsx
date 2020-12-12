@@ -16,15 +16,9 @@ const EditableTranslate: React.FC<Props> = ({ value, onChange }) => {
   return !inputVisible ? (
     <span onClick={() => setInputVisible(true)}>{value}</span>
   ) : (
-    <input
+    <input className="w-full border-b focus:border-blue-500 appearance-none focus:outline-none"
       value={value}
       onChange={handleChange}
-      style={{
-        padding: '8px 12px',
-        fontSize: '16px',
-        border: '1px solid #999',
-        borderColor: 'transparent transparent #999 transparent'
-      }}
     />
   )
 }

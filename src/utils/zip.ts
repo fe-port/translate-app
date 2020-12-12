@@ -6,18 +6,20 @@ export async function parseZip(file: File): Promise<LocaleFileContent[]> {
   try {
     const zip = await JsZip.loadAsync(file)
     const ret: LocaleFileContent[] = []
-    console.log(zip)
-    Object.keys(zip.files).map(async fileKey => {
+    for (const fileKey of Object.keys(zip.files)) {
       const localeFile = zip.files[fileKey]
-      const localeContent = await localeFile.async('string')
-      console.log(localeFile, localeContent)
-      ret.push({
-        filename: localeFile.name,
-        content: localeContent
-      })
-    })
+      // 目录跳过
+      if (!localeFile.dir) {
+        const localeContent = await localeFile.async('string')
+        ret.push({
+          filename: localeFile.name.split('/').pop().replace(/\.json/, ''),
+          content: localeContent
+        })
+      }
+    }
     return ret
   } catch (error) {
+    console.error(error)
     message.error('zip文件读取失败')
   }
   return []

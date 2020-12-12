@@ -15,3 +15,15 @@ body {
   @apply text-center text-lg;
   transform: translateY(50vh);
 }
+
+.translate-item {
+  @apply py-2 flex items-center;
+}
+
+.translate-item-label {
+  @apply text-gray-400 mr-4;
+}
+
+.translate-item-value {
+  @apply flex-grow text-gray-900;
+}

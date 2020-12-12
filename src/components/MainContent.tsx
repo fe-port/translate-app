@@ -48,6 +48,8 @@ const MainContent: React.FC<{ actionRef: React.MutableRefObject<MainContentActio
     noEnLangs
   } = useGlobalData()
 
+  console.log('locales', locales)
+
   // 没有配置
   if (!locales.length) {
     return (
@@ -63,6 +65,7 @@ const MainContent: React.FC<{ actionRef: React.MutableRefObject<MainContentActio
   try {
     enJson = JSON.parse(enLocale.content) as LocaleTranslates
   } catch (error) {
+    console.error(error)
     return (
       <p className="text-red-600 empty-content">
         解析英文源文件失败，请检查上传的zip文件是否正确!
@@ -151,19 +154,24 @@ const MainContent: React.FC<{ actionRef: React.MutableRefObject<MainContentActio
             key={panel.hash}
           >
             <div>
-              <p>en_US: {panel.locales[EN_LANG]}</p>
+              <p className="translate-item">
+                <span className="translate-item-label">en_US:</span>
+                <span className="translate-item-value">{panel.locales[EN_LANG]}</span>
+              </p>
               {panel.langs.map(lang => {
                 if (
                   !(hideTranslatedLocales && panel.locales[lang]) &&
                   !(visibleLang && lang !== visibleLang)
                 ) {
                   return (
-                    <p key={lang}>
-                      {lang}:{' '}
-                      <EditableTranslate
-                        value={panel.locales[lang]}
-                        onChange={v => handleInputChange(v, lang, panel.hash)}
-                      />
+                    <p  className="translate-item" key={lang}>
+                      <span className="translate-item-label">{lang}:</span>
+                      <span className="translate-item-value">
+                        <EditableTranslate
+                          value={panel.locales[lang]}
+                          onChange={v => handleInputChange(v, lang, panel.hash)}
+                        />
+                      </span>
                     </p>
                   )
                 }

@@ -21,6 +21,7 @@ const FixedFooter: React.FC<Props> = ({ langs, onExport }) => {
   const onSelectZipFile = useCallback(
     async ({ file }) => {
       const locales = await parseZip(file)
+      console.log(locales.length)
       setConfig('locales', locales)
     },
     [setConfig]
