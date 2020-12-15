@@ -45,7 +45,7 @@ const MainContent: React.FC<{ actionRef: React.MutableRefObject<MainContentActio
     visibleLang,
     locales,
     langs,
-    noEnLangs
+    // noEnLangs
   } = useGlobalData()
 
   console.log('locales', locales)
@@ -87,7 +87,7 @@ const MainContent: React.FC<{ actionRef: React.MutableRefObject<MainContentActio
       const panel = {
         description: enJson[hash].description,
         hash,
-        langs: noEnLangs,
+        langs,
         locales: langs.reduce<{ [key: string]: string }>((obj, lang) => {
           obj[lang] = localeJsons[lang][hash]?.defaultMessage
           return obj
@@ -137,7 +137,7 @@ const MainContent: React.FC<{ actionRef: React.MutableRefObject<MainContentActio
             }
             localeJsons[key.lang][key.hash].defaultMessage = value
           })
-          downloadZip(noEnLangs, localeJsons)
+          downloadZip(langs, localeJsons)
         }
       }
     }
@@ -147,28 +147,24 @@ const MainContent: React.FC<{ actionRef: React.MutableRefObject<MainContentActio
         {panels.map(panel => (
           <Panel
             header={
-              panel.description || (
+              panel.description ? `描述：${panel.description}` : (
                 <span className="text-red-600 empty-content">未提供描述</span>
               )
             }
             key={panel.hash}
           >
             <div>
-              <p className="translate-item">
-                <span className="translate-item-label">en_US:</span>
-                <span className="translate-item-value">{panel.locales[EN_LANG]}</span>
-              </p>
               {panel.langs.map(lang => {
                 if (
                   !(hideTranslatedLocales && panel.locales[lang]) &&
                   !(visibleLang && lang !== visibleLang)
                 ) {
                   return (
-                    <p  className="translate-item" key={lang}>
+                    <p className="translate-item" key={lang}>
                       <span className="translate-item-label">{lang}:</span>
                       <span className="translate-item-value">
                         <EditableTranslate
-                          value={panel.locales[lang]}
+                          defaultValue={panel.locales[lang]}
                           onChange={v => handleInputChange(v, lang, panel.hash)}
                         />
                       </span>

@@ -9,7 +9,7 @@ export async function parseZip(file: File): Promise<LocaleFileContent[]> {
     for (const fileKey of Object.keys(zip.files)) {
       const localeFile = zip.files[fileKey]
       // 目录跳过
-      if (!localeFile.dir) {
+      if (!localeFile.dir && localeFile.name.endsWith('.json')) {
         const localeContent = await localeFile.async('string')
         ret.push({
           filename: localeFile.name.split('/').pop().replace(/\.json/, ''),
