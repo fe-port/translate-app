@@ -11,3 +11,11 @@ export interface LocaleFileContent {
   filename: string
   content: string
 }
+
+export type ChangedLangs = Map<
+  {
+    lang: string
+    hash: string
+  },
+  string
+>

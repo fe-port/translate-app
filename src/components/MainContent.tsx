@@ -1,10 +1,11 @@
-import React from 'react'
+import React, { useCallback, useState } from 'react'
 import { Collapse } from 'antd'
 import EditableTranslate from './EditableTranslate'
 import { useGlobalData } from '../provider/data'
-import { LocaleTranslateItem } from '../types'
+import { ChangedLangs, LocaleTranslateItem } from '../types'
 import { EN_LANG } from '../configs/constants'
 import { downloadZip } from 'src/utils/zip'
+import { getStoredLangs, saveLangs } from 'src/utils/storage'
 
 const { Panel } = Collapse
 interface LocaleTranslates {
@@ -21,13 +22,7 @@ export interface MainContentAction {
   exportZip: () => void
 }
 
-const changedValues: Map<
-  {
-    lang: string
-    hash: string
-  },
-  string
-> = new Map()
+const changedValues: ChangedLangs = getStoredLangs()
 
 function shouldPanelDefaultCollapsed(
   panel: LangPanelProps,
@@ -38,15 +33,23 @@ function shouldPanelDefaultCollapsed(
   )
 }
 
-const MainContent: React.FC<{ actionRef: React.MutableRefObject<MainContentAction>}> = ({ actionRef }) => {
+const MainContent: React.FC<{
+  actionRef: React.MutableRefObject<MainContentAction>
+}> = ({ actionRef }) => {
   const {
     hideTranslatedPanel,
     hideTranslatedLocales,
     visibleLang,
     locales,
-    langs,
+    langs
     // noEnLangs
   } = useGlobalData()
+  const [updatedAt, setUpdatedAt] = useState<Date>()
+
+  const blurHandler = useCallback(() => {
+    saveLangs(changedValues)
+    setUpdatedAt(new Date())
+  }, [setUpdatedAt])
 
   console.log('locales', locales)
 
@@ -143,40 +146,52 @@ const MainContent: React.FC<{ actionRef: React.MutableRefObject<MainContentActio
     }
 
     return (
-      <Collapse defaultActiveKey={defaultActiveKeys}>
-        {panels.map(panel => (
-          <Panel
-            header={
-              panel.description ? `描述：${panel.description}` : (
-                <span className="text-red-600 empty-content">未提供描述</span>
-              )
-            }
-            key={panel.hash}
-          >
-            <div>
-              {panel.langs.map(lang => {
-                if (
-                  !(hideTranslatedLocales && panel.locales[lang]) &&
-                  !(visibleLang && lang !== visibleLang)
-                ) {
-                  return (
-                    <p className="translate-item" key={lang}>
-                      <span className="translate-item-label">{lang}:</span>
-                      <span className="translate-item-value">
-                        <EditableTranslate
-                          defaultValue={panel.locales[lang]}
-                          onChange={v => handleInputChange(v, lang, panel.hash)}
-                        />
-                      </span>
-                    </p>
-                  )
-                }
-                return null
-              })}
-            </div>
-          </Panel>
-        ))}
-      </Collapse>
+      <>
+        {updatedAt && (
+          <div className="absolute right-2 -top-8 text-gray-300">
+            自动更新：{updatedAt?.toLocaleTimeString()}
+          </div>
+        )}
+        <Collapse defaultActiveKey={defaultActiveKeys}>
+          {panels.map(panel => (
+            <Panel
+              header={
+                panel.description ? (
+                  `描述：${panel.description}`
+                ) : (
+                  <span className="text-red-600 empty-content">未提供描述</span>
+                )
+              }
+              key={panel.hash}
+            >
+              <div>
+                {panel.langs.map(lang => {
+                  if (
+                    !(hideTranslatedLocales && panel.locales[lang]) &&
+                    !(visibleLang && lang !== visibleLang)
+                  ) {
+                    return (
+                      <p className="translate-item" key={lang}>
+                        <span className="translate-item-label">{lang}:</span>
+                        <span className="translate-item-value">
+                          <EditableTranslate
+                            defaultValue={panel.locales[lang]}
+                            onChange={v =>
+                              handleInputChange(v, lang, panel.hash)
+                            }
+                            onBlur={blurHandler}
+                          />
+                        </span>
+                      </p>
+                    )
+                  }
+                  return null
+                })}
+              </div>
+            </Panel>
+          ))}
+        </Collapse>
+      </>
     )
   } catch (e) {
     console.error(e)

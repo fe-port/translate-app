@@ -3,9 +3,14 @@ import React, { useCallback, useState } from 'react'
 interface Props {
   defaultValue: string
   onChange?: (v: string) => void
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void
 }
 
-const EditableTranslate: React.FC<Props> = ({ defaultValue, onChange }) => {
+const EditableTranslate: React.FC<Props> = ({
+  defaultValue,
+  onChange,
+  onBlur
+}) => {
   const [inputVisible, setInputVisible] = useState(!defaultValue)
   const [value, setValue] = useState(defaultValue ?? '')
   const handleChange = useCallback(
@@ -18,9 +23,11 @@ const EditableTranslate: React.FC<Props> = ({ defaultValue, onChange }) => {
   return !inputVisible ? (
     <span onClick={() => setInputVisible(true)}>{defaultValue}</span>
   ) : (
-    <input className="w-full border-b focus:border-blue-500 appearance-none focus:outline-none"
+    <input
+      className="editable-translate w-full border-b focus:border-blue-500 appearance-none focus:outline-none"
       value={value}
       onChange={handleChange}
+      onBlur={onBlur}
     />
   )
 }

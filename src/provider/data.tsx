@@ -16,7 +16,10 @@ interface GlobalData {
 interface GlobalDataWithAction extends GlobalData {
   langs: string[]
   noEnLangs: string[]
-  setConfig: (key: keyof GlobalData, value: boolean | string | LocaleFileContent[]) => void
+  setConfig: (
+    key: keyof GlobalData,
+    value: boolean | string | LocaleFileContent[]
+  ) => void
 }
 
 const defaultGlobalData = {
