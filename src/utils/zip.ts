@@ -8,13 +8,23 @@ export async function parseZip(file: File): Promise<LocaleFileContent[]> {
     const ret: LocaleFileContent[] = []
     for (const fileKey of Object.keys(zip.files)) {
       const localeFile = zip.files[fileKey]
-      // 目录跳过
+      // 目录跳过，非json跳过
       if (!localeFile.dir && localeFile.name.endsWith('.json')) {
         const localeContent = await localeFile.async('string')
-        ret.push({
-          filename: localeFile.name.split('/').pop().replace(/\.json/, ''),
-          content: localeContent
-        })
+        const filename = localeFile.name
+          .split('/')
+          .pop()
+          .replace(/\.json/, '')
+        // 非法文件跳过
+        if (filename.match(/^[a-zA-Z-]+$/)) {
+          ret.push({
+            filename: localeFile.name
+              .split('/')
+              .pop()
+              .replace(/\.json/, ''),
+            content: localeContent
+          })
+        }
       }
     }
     return ret
@@ -25,12 +35,15 @@ export async function parseZip(file: File): Promise<LocaleFileContent[]> {
   return []
 }
 
-export function downloadZip(noEnLangs: string[], localeJsons: {
-  [key: string]: LocaleTranslates
-}) {
+export function downloadZip(
+  langs: string[],
+  localeJsons: {
+    [key: string]: LocaleTranslates
+  }
+) {
   const zip = new JsZip()
   const langFolder = zip.folder('lang')
-  noEnLangs.forEach(lang => {
+  langs.forEach(lang => {
     // json重新排序
     const newJson = Object.keys(localeJsons[lang])
       .sort((a, b) => (a < b ? -1 : 1))

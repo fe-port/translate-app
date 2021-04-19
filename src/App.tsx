@@ -5,7 +5,7 @@ import { useGlobalData } from './provider/data'
 
 const TranslatePage: React.FC = () => {
   const mainContentRef = useRef<MainContentAction>()
-  const { noEnLangs } = useGlobalData()
+  const { langs } = useGlobalData()
   // 导出
   const doExport = () => {
     mainContentRef.current.exportZip()
@@ -14,7 +14,7 @@ const TranslatePage: React.FC = () => {
   return (
     <div style={{ minHeight: 'calc(100vh - 64px)', paddingBottom: '84px' }}>
       <MainContent actionRef={mainContentRef} />
-      <FixedFooter langs={noEnLangs} onExport={doExport} />
+      <FixedFooter langs={langs} onExport={doExport} />
     </div>
   )
 }

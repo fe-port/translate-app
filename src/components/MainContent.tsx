@@ -3,7 +3,7 @@ import { Collapse } from 'antd'
 import EditableTranslate from './EditableTranslate'
 import { useGlobalData } from '../provider/data'
 import { LocaleTranslateItem } from '../types'
-import { EN_LANG } from '../configs/constants'
+import { DEFAULT_LANG } from '../configs/constants'
 import { downloadZip } from 'src/utils/zip'
 
 const { Panel } = Collapse
@@ -38,14 +38,15 @@ function shouldPanelDefaultCollapsed(
   )
 }
 
-const MainContent: React.FC<{ actionRef: React.MutableRefObject<MainContentAction>}> = ({ actionRef }) => {
+const MainContent: React.FC<{
+  actionRef: React.MutableRefObject<MainContentAction>
+}> = ({ actionRef }) => {
   const {
     hideTranslatedPanel,
     hideTranslatedLocales,
     visibleLang,
     locales,
-    langs,
-    // noEnLangs
+    langs
   } = useGlobalData()
 
   console.log('locales', locales)
@@ -58,17 +59,18 @@ const MainContent: React.FC<{ actionRef: React.MutableRefObject<MainContentActio
       </p>
     )
   }
-  // 读取英文翻译
-  const enLocale = locales.find(locale => locale.filename === EN_LANG)
-  // 解析英文中的所有hash数据
-  let enJson: LocaleTranslates = {}
+  // 读取默认翻译
+  const defaultLocale = locales.find(locale => locale.filename === DEFAULT_LANG)
+
+  // 解析默认翻译中的所有hash数据
+  let defaultJson: LocaleTranslates = {}
   try {
-    enJson = JSON.parse(enLocale.content) as LocaleTranslates
+    defaultJson = JSON.parse(defaultLocale.content) as LocaleTranslates
   } catch (error) {
     console.error(error)
     return (
       <p className="text-red-600 empty-content">
-        解析英文源文件失败，请检查上传的zip文件是否正确!
+        解析源文件失败，请检查上传的zip文件是否正确!
       </p>
     )
   }
@@ -78,30 +80,37 @@ const MainContent: React.FC<{ actionRef: React.MutableRefObject<MainContentActio
     const localeJsons = locales.reduce<{
       [key: string]: LocaleTranslates
     }>((obj, locale) => {
-      obj[locale.filename] = JSON.parse(locale.content) as LocaleTranslates
+      // 默认翻译不展示
+      if (locale.filename !== DEFAULT_LANG) {
+        obj[locale.filename] = JSON.parse(locale.content) as LocaleTranslates
+      }
       return obj
     }, {})
 
     // 面板数据
-    const panels = Object.keys(enJson).reduce<LangPanelProps[]>((arr, hash) => {
-      const panel = {
-        description: enJson[hash].description,
-        hash,
-        langs,
-        locales: langs.reduce<{ [key: string]: string }>((obj, lang) => {
-          obj[lang] = localeJsons[lang][hash]?.defaultMessage
-          return obj
-        }, {})
-      }
-      if (
-        !(
-          hideTranslatedPanel && shouldPanelDefaultCollapsed(panel, visibleLang)
-        )
-      ) {
-        arr.push(panel)
-      }
-      return arr
-    }, [])
+    const panels = Object.keys(defaultJson).reduce<LangPanelProps[]>(
+      (arr, hash) => {
+        const panel = {
+          description: defaultJson[hash].description,
+          hash,
+          langs,
+          locales: langs.reduce<{ [key: string]: string }>((obj, lang) => {
+            obj[lang] = localeJsons[lang][hash]?.defaultMessage
+            return obj
+          }, {})
+        }
+        if (
+          !(
+            hideTranslatedPanel &&
+            shouldPanelDefaultCollapsed(panel, visibleLang)
+          )
+        ) {
+          arr.push(panel)
+        }
+        return arr
+      },
+      []
+    )
 
     // 如果所有语言都有翻译，则默认收起
     const defaultActiveKeys = panels.reduce<string[]>((arr, panel) => {
@@ -132,7 +141,7 @@ const MainContent: React.FC<{ actionRef: React.MutableRefObject<MainContentActio
             if (!localeJsons[key.lang][key.hash]) {
               localeJsons[key.lang][key.hash] = {
                 defaultMessage: '',
-                description: enJson[key.hash].description
+                description: defaultJson[key.hash].description
               }
             }
             localeJsons[key.lang][key.hash].defaultMessage = value
@@ -147,7 +156,9 @@ const MainContent: React.FC<{ actionRef: React.MutableRefObject<MainContentActio
         {panels.map(panel => (
           <Panel
             header={
-              panel.description ? `描述：${panel.description}` : (
+              panel.description ? (
+                `描述：${panel.description}`
+              ) : (
                 <span className="text-red-600 empty-content">未提供描述</span>
               )
             }

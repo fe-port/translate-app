@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from 'react'
-import { EN_LANG } from 'src/configs/constants'
+import { DEFAULT_LANG } from 'src/configs/constants'
 import { LocaleFileContent } from '../types'
 
 interface GlobalData {
@@ -15,8 +15,10 @@ interface GlobalData {
 
 interface GlobalDataWithAction extends GlobalData {
   langs: string[]
-  noEnLangs: string[]
-  setConfig: (key: keyof GlobalData, value: boolean | string | LocaleFileContent[]) => void
+  setConfig: (
+    key: keyof GlobalData,
+    value: boolean | string | LocaleFileContent[]
+  ) => void
 }
 
 const defaultGlobalData = {
@@ -29,7 +31,6 @@ const defaultGlobalData = {
 const GlobalDataContext = createContext<GlobalDataWithAction>({
   ...defaultGlobalData,
   langs: [],
-  noEnLangs: [],
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   setConfig: () => {}
 })
@@ -41,8 +42,7 @@ const GlobalDataProvider: React.FC = props => {
     <GlobalDataContext.Provider
       value={{
         ...globalData,
-        langs,
-        noEnLangs: langs.filter(lang => lang !== EN_LANG),
+        langs: langs.filter(lang => lang !== DEFAULT_LANG),
         setConfig: (key, value) => {
           setGlobalData({
             ...globalData,
